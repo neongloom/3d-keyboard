@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>3d keyboard</title>
+    <style>
+      body {
+        margin: 0;
+        font-size: 16px;
+        box-sizing: border-box;
+        padding: 0;
+        overscroll-behavior: none;
+          text-align: center;
+      }
+
+      #container {
+        padding: 0px;
+      }
+
+      canvas {
+        display: block;
+      }
+
+      #info {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        margin-top: 24px;
+        padding: 3px 6px;
+        transform: translateX(-50%);
+        text-align: center;
+        z-index: 1;
+        color: white;
+        font-family: consolas, sans-serif;
+        background-color: black;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="container"></div>
+    <div id="info">
+    </div>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
