@@ -1,4 +1,5 @@
 import * as THREE from './build/three.module.js';
+// import * as Howler from './build/howler.core.min.js';
 
 import Stats from './jsm/stats.module.js';
 
@@ -18,12 +19,43 @@ let pressed = false;
 
 let mixers = [];
 let keys = [];
+
 let samples = [
-  new Audio('samples/194795.mp3'),
-  new Audio('samples/194796.mp3'),
-  new Audio('samples/194797.mp3'),
-  new Audio('samples/194798.mp3'),
-  new Audio('samples/194799.mp3')
+  new Howl({
+    src: ['samples/194795.mp3'],
+    sprite: {
+      click: [0, 100],
+      clack: [100, 200]
+    }
+  }),
+  new Howl({
+    src: ['samples/194796.mp3'],
+    sprite: {
+      click: [0, 100],
+      clack: [100, 200]
+    }
+  }),
+  new Howl({
+    src: ['samples/194797.mp3'],
+    sprite: {
+      click: [0, 100],
+      clack: [100, 200]
+    }
+  }),
+  new Howl({
+    src: ['samples/194798.mp3'],
+    sprite: {
+      click: [0, 100],
+      clack: [100, 200]
+    }
+  }),
+  new Howl({
+    src: ['samples/194799.mp3'],
+    sprite: {
+      click: [0, 100],
+      clack: [100, 200]
+    }
+  })
 ];
 
 init();
@@ -40,8 +72,8 @@ function init() {
   renderer.outputEncoding = THREE.sRGBEncoding;
   container.appendChild(renderer.domElement);
 
-  stats = new Stats();
-  container.appendChild(stats.dom);
+  // stats = new Stats();
+  // container.appendChild(stats.dom);
 
   // camera
   camera = new THREE.PerspectiveCamera(
@@ -142,10 +174,8 @@ function init() {
     color: 0x404040
   });
 
-  // ground
   let ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(3, 3), deskMat);
   ground.rotation.x = -Math.PI / 2;
-  // ground.position.y -= 0.01;
   scene.add(ground);
   ground.receiveShadow = true;
 
@@ -251,23 +281,20 @@ function onWindowResize() {
 }
 
 function keyDown(e) {
-  let keycode = e.code;
-
-  let clip = keys.find(clipObj => clipObj.name.includes(keycode));
+  let clip = keys.find(clipObj => clipObj.name.includes(e.code));
   clip.actionPress.play();
 
   if (clip.pressed == false) {
     clip.pressed = true;
-    samples[Math.floor(Math.random() * 5)].play();
+    samples[Math.floor(Math.random() * 5)].play('click');
   }
 }
 
 function keyUp(e) {
-  const keycode = e.code;
-
-  let clip = keys.find(clipObj => clipObj.name.includes(keycode));
+  let clip = keys.find(clipObj => clipObj.name.includes(e.code));
   clip.actionRelease.play();
   clip.pressed = false;
+  samples[Math.floor(Math.random() * 5)].play('clack');
 }
 
 function animate() {
@@ -280,7 +307,7 @@ function animate() {
     mixers.forEach(i => {
       i.update(delta);
     });
-  stats.update();
+  // stats.update();
 
   renderer.render(scene, camera);
 }
