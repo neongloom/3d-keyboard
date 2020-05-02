@@ -1,5 +1,4 @@
 import * as THREE from './build/three.module.js';
-// import * as Howler from './build/howler.core.min.js';
 
 import Stats from './jsm/stats.module.js';
 
@@ -11,11 +10,7 @@ let stats, controls;
 let renderer, scene, camera;
 let clock = new THREE.Clock();
 
-let mouse = new THREE.Vector2(),
-  INTERSECTED;
-let raycaster;
 let model;
-let pressed = false;
 
 let mixers = [];
 let keys = [];
@@ -87,7 +82,6 @@ function init() {
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xffffff);
-  // scene.fog = new THREE.Fog(0xffffff, 15, 52);
   // scene.fog = new THREE.FogExp2(0xffffff, 0.03);
 
   let light = new THREE.HemisphereLight(0xffffff, 0x101010, 0.2); // sky color, ground color, intensity
@@ -138,23 +132,9 @@ function init() {
   // scene.add(light.target);
 
   let floorTex = [
-    // new THREE.TextureLoader().load(
-    //   'mat/white_norway_spruce_quarter_cut_Base_Color.jpg'
-    // ),
-    // new THREE.TextureLoader().load(
-    //   'mat/white_norway_spruce_quarter_cut_Normal.jpg'
-    // ),
-    // new THREE.TextureLoader().load(
-    //   'mat/white_norway_spruce_quarter_cut_Roughness.jpg'
-    // ),
-
     new THREE.TextureLoader().load('mat/black_koto_quarter_cut_Base_Color.jpg'),
     new THREE.TextureLoader().load('mat/black_koto_quarter_cut_Normal.jpg'),
-    new THREE.TextureLoader().load('mat/black_koto_quarter_cut_Roughness.jpg'),
-
-    new THREE.TextureLoader().load('mat/black_ash_quarter_cut_Base_Color.jpg'),
-    new THREE.TextureLoader().load('mat/black_ash_quarter_cut_Normal.jpg'),
-    new THREE.TextureLoader().load('mat/black_ash_quarter_cut_Roughness.jpg')
+    new THREE.TextureLoader().load('mat/black_koto_quarter_cut_Roughness.jpg')
   ];
 
   floorTex.forEach(i => {
@@ -170,16 +150,10 @@ function init() {
     color: 0x505050
   });
 
-  let plainMat = new THREE.MeshStandardMaterial({
-    color: 0x404040
-  });
-
   let ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(3, 3), deskMat);
   ground.rotation.x = -Math.PI / 2;
   scene.add(ground);
   ground.receiveShadow = true;
-
-  let gltfLoader = new GLTFLoader();
 
   let positionKF = new THREE.VectorKeyframeTrack(
     '.position',
@@ -200,10 +174,10 @@ function init() {
   );
 
   // create an animation sequence with the tracks
-  //
   let clip = new THREE.AnimationClip('Action', 0.02, [positionKF]);
   let clip2 = new THREE.AnimationClip('Action2', 0.01, [releasePositionKF]);
 
+  let gltfLoader = new GLTFLoader();
   gltfLoader.load('keeb.glb', gltf => {
     model = gltf.scene;
     scene.add(model);
@@ -262,16 +236,9 @@ function init() {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
 
-  // controls = new OrbitControls(camera, renderer.domElement);
-  // controls.target.set(0, 0, 0);
-  // controls.update();
-
-  raycaster = new THREE.Raycaster();
-
   window.addEventListener('resize', onWindowResize, false);
   window.addEventListener('keydown', keyDown, false);
   window.addEventListener('keyup', keyUp, false);
-  window.addEventListener('mousemove', onDocumentMouseMove, false);
 }
 
 function onWindowResize() {
@@ -302,7 +269,6 @@ function animate() {
 
   let delta = clock.getDelta();
 
-  // controls.update(delta);
   if (mixers)
     mixers.forEach(i => {
       i.update(delta);
@@ -310,21 +276,4 @@ function animate() {
   // stats.update();
 
   renderer.render(scene, camera);
-}
-
-function onDocumentMouseMove(event) {
-  event.preventDefault();
-
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-}
-
-function getIntersects(x, y) {
-  x = (x / window.innerWidth) * 2 - 1;
-  y = -(y / window.innerHeight) * 2 + 1;
-
-  mouseVector.set(x, y, 0.5);
-  raycaster.setFromCamera(mouseVector, camera);
-
-  return raycaster.intersectObject(group, true);
 }
