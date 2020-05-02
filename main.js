@@ -197,7 +197,7 @@ function init() {
         keyrelease.clampWhenFinished = true;
 
         keys.push({
-          name: obj.name,
+          name: obj.name.split('-'),
           actionRelease: keyrelease,
           actionPress: keypress,
           pressed: false
@@ -251,37 +251,21 @@ function onWindowResize() {
 }
 
 function keyDown(e) {
-  let keycode = e.keyCode;
-  const loc = e.location;
-  const keyLoc = `${keycode}${loc}`;
+  let keycode = e.code;
 
-  let clip;
-  if (loc === 0) {
-    clip = keys.find(clipObj => clipObj.name == keycode);
-  } else {
-    clip = keys.find(clipObj => clipObj.name == keyLoc);
-    console.log(clip.name);
-  }
+  let clip = keys.find(clipObj => clipObj.name.includes(keycode));
   clip.actionPress.play();
 
   if (clip.pressed == false) {
     clip.pressed = true;
-    let sampleNum = Math.floor(Math.random() * 5);
-    samples[sampleNum].play();
+    samples[Math.floor(Math.random() * 5)].play();
   }
 }
 
 function keyUp(e) {
-  const keycode = e.keyCode;
-  const loc = e.location;
-  const keyLoc = `${keycode}${loc}`;
+  const keycode = e.code;
 
-  let clip;
-  if (loc == 0) {
-    clip = keys.find(clipObj => clipObj.name == keycode);
-  } else {
-    clip = keys.find(clipObj => clipObj.name == keyLoc);
-  }
+  let clip = keys.find(clipObj => clipObj.name.includes(keycode));
   clip.actionRelease.play();
   clip.pressed = false;
 }
