@@ -17,6 +17,9 @@ let model;
 let pressed = false;
 
 let mixer, clipAction, clipAction2;
+let mixers = [];
+let key_press = [];
+let key_release = [];
 
 init();
 animate();
@@ -50,7 +53,7 @@ function init() {
   // scene.fog = new THREE.Fog(0xffffff, 15, 52);
   // scene.fog = new THREE.FogExp2(0xffffff, 0.03);
 
-  let light = new THREE.HemisphereLight(0xffffff, 0x101010, 0.5); // sky color, ground color, intensity
+  let light = new THREE.HemisphereLight(0xffffff, 0x101010, 0.2); // sky color, ground color, intensity
   light.position.set(0, 8, 0);
   scene.add(light);
 
@@ -126,7 +129,8 @@ function init() {
   let deskMat = new THREE.MeshStandardMaterial({
     map: floorTex[0],
     normalMap: floorTex[1],
-    roughnessMap: floorTex[2]
+    roughnessMap: floorTex[2],
+    color: 0x505050
   });
 
   let plainMat = new THREE.MeshStandardMaterial({
@@ -134,7 +138,7 @@ function init() {
   });
 
   // ground
-  let ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(5, 5), deskMat);
+  let ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(3, 3), deskMat);
   ground.rotation.x = -Math.PI / 2;
   // ground.position.y -= 0.01;
   scene.add(ground);
@@ -144,13 +148,13 @@ function init() {
 
   let positionKF = new THREE.VectorKeyframeTrack(
     '.position',
-    [0, 0.1],
-    [0, 0, 0, 0, -0.1, 0]
+    [0, 0.05],
+    [0, 0, 0, 0, -0.004, 0]
   );
   let releasePositionKF = new THREE.VectorKeyframeTrack(
     '.position',
-    [0, 0.05],
-    [0, 0, 0, 0, 0.1, 0]
+    [0, 0.02],
+    [0, 0, 0, 0, 0.004, 0]
   );
 
   let colorKF = new THREE.ColorKeyframeTrack(
@@ -162,41 +166,48 @@ function init() {
 
   // create an animation sequence with the tracks
   //
-  let clip = new THREE.AnimationClip('Action', 0.1, [positionKF]);
-  let clip2 = new THREE.AnimationClip('Action2', 0.05, [releasePositionKF]);
+  let clip = new THREE.AnimationClip('Action', 0.05, [positionKF]);
+  let clip2 = new THREE.AnimationClip('Action2', 0.02, [releasePositionKF]);
 
   gltfLoader.load('keeb.glb', gltf => {
     model = gltf.scene;
-    // model.rotation.y = Math.PI;
     scene.add(model);
 
     model.scale.set(1, 1, 1);
+    mixer = new THREE.AnimationMixer(model);
     model.traverse(obj => {
       if (obj.castShadow !== undefined) {
         obj.castShadow = true;
         obj.receiveShadow = true;
+      }
+      if (obj.name == 'a') {
+        console.log('a');
+      }
+      if (obj.isMesh) {
+        let newMix = new THREE.AnimationMixer(obj);
 
-        // setup the THREE.AnimationMixer
-        mixer = new THREE.AnimationMixer(obj);
-        clipAction = mixer.clipAction(clip);
-        clipAction.setLoop(THREE.LoopOnce);
-        clipAction.clampWhenFinished = true;
-        clipAction2 = mixer.clipAction(clip2);
-        clipAction2.setLoop(THREE.LoopOnce);
-        clipAction2.clampWhenFinished = true;
+        let keypress = newMix.clipAction(clip);
+        console.log(keypress);
+        keypress.setLoop(THREE.LoopOnce);
+        keypress.clampWhenFinished = true;
+        key_press.push({ name: obj.name, action: keypress });
 
-        mixer.addEventListener('finished', e => {
+        let keyrelease = newMix.clipAction(clip2);
+        keyrelease.setLoop(THREE.LoopOnce);
+        keyrelease.clampWhenFinished = true;
+        key_release.push({ name: obj.name, action: keyrelease });
+        //   roughnessMipmapper.generateMipmaps(obj.material);
+
+        newMix.addEventListener('finished', e => {
           if (e.action._clip.name === 'Action2') {
-            clipAction2.reset();
-            clipAction2.stop();
-            clipAction.reset();
-            clipAction.stop();
+            keyrelease.reset();
+            keyrelease.stop();
+            keypress.reset();
+            keypress.stop();
           }
         });
+        mixers.push(newMix);
       }
-      // if (obj.isMesh) {
-      //   roughnessMipmapper.generateMipmaps(obj.material);
-      // }
     });
 
     // roughnessMipmapper.dispose();
@@ -237,26 +248,34 @@ function onWindowResize() {
 
 function keyDown(e) {
   const key = e.key;
-  if (key == 'Enter') {
-    pressed = true;
-    model.traverse(obj => {
-      if (obj.name == 'sa_low') {
-        clipAction.play();
-      }
-    });
+  const loc = e.location;
+  const keyLoc = e.key + e.location;
+  console.log(key);
+  // console.log(key);
+  let clip;
+  if (loc == 0) {
+    clip = key_press.find(clipObj => clipObj.name == key);
+  } else {
+    clip = key_press.find(clipObj => clipObj.name == keyLoc);
+    console.log(clip.name);
   }
+  clip.action.play();
+  console.log(clip);
+  //   pressed = true;
 }
 
 function keyUp(e) {
   const key = e.key;
+  const loc = e.location;
+  const keyLoc = e.key + e.location;
   pressed = false;
-  if (key == 'Enter') {
-    model.traverse(obj => {
-      if (obj.name == 'sa_low') {
-        clipAction2.play();
-      }
-    });
+  let clip;
+  if (loc == 0) {
+    clip = key_release.find(clipObj => clipObj.name == key);
+  } else {
+    clip = key_release.find(clipObj => clipObj.name == keyLoc);
   }
+  clip.action.play();
 }
 
 function animate() {
@@ -266,6 +285,10 @@ function animate() {
 
   // controls.update(delta);
   if (mixer) mixer.update(delta);
+  if (mixers)
+    mixers.forEach(i => {
+      i.update(delta);
+    });
   stats.update();
 
   renderer.render(scene, camera);
