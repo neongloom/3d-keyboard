@@ -17,8 +17,14 @@ let model;
 let pressed = false;
 
 let mixers = [];
-let key_press = [];
-let key_release = [];
+let keys = [];
+let samples = [
+  new Audio('samples/194795.mp3'),
+  new Audio('samples/194796.mp3'),
+  new Audio('samples/194797.mp3'),
+  new Audio('samples/194798.mp3'),
+  new Audio('samples/194799.mp3')
+];
 
 init();
 animate();
@@ -185,12 +191,17 @@ function init() {
         let keypress = newMix.clipAction(clip);
         keypress.setLoop(THREE.LoopOnce);
         keypress.clampWhenFinished = true;
-        key_press.push({ name: obj.name, action: keypress });
 
         let keyrelease = newMix.clipAction(clip2);
         keyrelease.setLoop(THREE.LoopOnce);
         keyrelease.clampWhenFinished = true;
-        key_release.push({ name: obj.name, action: keyrelease });
+
+        keys.push({
+          name: obj.name,
+          actionRelease: keyrelease,
+          actionPress: keypress,
+          pressed: false
+        });
         //   roughnessMipmapper.generateMipmaps(obj.material);
 
         newMix.addEventListener('finished', e => {
@@ -246,28 +257,33 @@ function keyDown(e) {
 
   let clip;
   if (loc === 0) {
-    clip = key_press.find(clipObj => clipObj.name == keycode);
+    clip = keys.find(clipObj => clipObj.name == keycode);
   } else {
-    clip = key_press.find(clipObj => clipObj.name == keyLoc);
+    clip = keys.find(clipObj => clipObj.name == keyLoc);
     console.log(clip.name);
   }
-  clip.action.play();
-  //   pressed = true;
+  clip.actionPress.play();
+
+  if (clip.pressed == false) {
+    clip.pressed = true;
+    let sampleNum = Math.floor(Math.random() * 5);
+    samples[sampleNum].play();
+  }
 }
 
 function keyUp(e) {
   const keycode = e.keyCode;
   const loc = e.location;
   const keyLoc = `${keycode}${loc}`;
-  pressed = false;
 
   let clip;
   if (loc == 0) {
-    clip = key_release.find(clipObj => clipObj.name == keycode);
+    clip = keys.find(clipObj => clipObj.name == keycode);
   } else {
-    clip = key_release.find(clipObj => clipObj.name == keyLoc);
+    clip = keys.find(clipObj => clipObj.name == keyLoc);
   }
-  clip.action.play();
+  clip.actionRelease.play();
+  clip.pressed = false;
 }
 
 function animate() {
