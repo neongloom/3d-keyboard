@@ -45,7 +45,7 @@ function init() {
     0.01,
     90
   );
-  camera.position.set(0, 0.3, 0);
+  camera.position.set(0, 0.3, 0.0);
   camera.lookAt(new THREE.Vector3(0, 0, 0));
 
   scene = new THREE.Scene();
@@ -148,12 +148,12 @@ function init() {
 
   let positionKF = new THREE.VectorKeyframeTrack(
     '.position',
-    [0, 0.05],
+    [0, 0.02],
     [0, 0, 0, 0, -0.004, 0]
   );
   let releasePositionKF = new THREE.VectorKeyframeTrack(
     '.position',
-    [0, 0.02],
+    [0, 0.01],
     [0, 0, 0, 0, 0.004, 0]
   );
 
@@ -166,8 +166,8 @@ function init() {
 
   // create an animation sequence with the tracks
   //
-  let clip = new THREE.AnimationClip('Action', 0.05, [positionKF]);
-  let clip2 = new THREE.AnimationClip('Action2', 0.02, [releasePositionKF]);
+  let clip = new THREE.AnimationClip('Action', 0.02, [positionKF]);
+  let clip2 = new THREE.AnimationClip('Action2', 0.01, [releasePositionKF]);
 
   gltfLoader.load('keeb.glb', gltf => {
     model = gltf.scene;
@@ -226,9 +226,9 @@ function init() {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
 
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.target.set(0, 0, 0);
-  controls.update();
+  // controls = new OrbitControls(camera, renderer.domElement);
+  // controls.target.set(0, 0, 0);
+  // controls.update();
 
   raycaster = new THREE.Raycaster();
 
@@ -247,13 +247,13 @@ function onWindowResize() {
 }
 
 function keyDown(e) {
-  const key = e.key;
+  const key = e.key.toLowerCase();
   const loc = e.location;
-  const keyLoc = e.key + e.location;
-  console.log(key);
+  const keyLoc = `${key}${loc}`;
+  console.log(keyLoc);
   // console.log(key);
   let clip;
-  if (loc == 0) {
+  if (loc === 0) {
     clip = key_press.find(clipObj => clipObj.name == key);
   } else {
     clip = key_press.find(clipObj => clipObj.name == keyLoc);
@@ -265,9 +265,9 @@ function keyDown(e) {
 }
 
 function keyUp(e) {
-  const key = e.key;
+  const key = e.key.toLowerCase();
   const loc = e.location;
-  const keyLoc = e.key + e.location;
+  const keyLoc = `${key}${loc}`;
   pressed = false;
   let clip;
   if (loc == 0) {
