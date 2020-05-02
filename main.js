@@ -16,7 +16,6 @@ let raycaster;
 let model;
 let pressed = false;
 
-let mixer, clipAction, clipAction2;
 let mixers = [];
 let key_press = [];
 let key_release = [];
@@ -174,20 +173,16 @@ function init() {
     scene.add(model);
 
     model.scale.set(1, 1, 1);
-    mixer = new THREE.AnimationMixer(model);
     model.traverse(obj => {
       if (obj.castShadow !== undefined) {
         obj.castShadow = true;
         obj.receiveShadow = true;
       }
-      if (obj.name == 'a') {
-        console.log('a');
-      }
+
       if (obj.isMesh) {
         let newMix = new THREE.AnimationMixer(obj);
 
         let keypress = newMix.clipAction(clip);
-        console.log(keypress);
         keypress.setLoop(THREE.LoopOnce);
         keypress.clampWhenFinished = true;
         key_press.push({ name: obj.name, action: keypress });
@@ -236,8 +231,6 @@ function init() {
   window.addEventListener('keydown', keyDown, false);
   window.addEventListener('keyup', keyUp, false);
   window.addEventListener('mousemove', onDocumentMouseMove, false);
-  // window.addEventListener('mousedown', onMouseDown, false);
-  // window.addEventListener('mouseup', onMouseUp, false);
 }
 
 function onWindowResize() {
@@ -247,31 +240,30 @@ function onWindowResize() {
 }
 
 function keyDown(e) {
-  const key = e.key.toLowerCase();
+  let keycode = e.keyCode;
   const loc = e.location;
-  const keyLoc = `${key}${loc}`;
-  console.log(keyLoc);
-  // console.log(key);
+  const keyLoc = `${keycode}${loc}`;
+
   let clip;
   if (loc === 0) {
-    clip = key_press.find(clipObj => clipObj.name == key);
+    clip = key_press.find(clipObj => clipObj.name == keycode);
   } else {
     clip = key_press.find(clipObj => clipObj.name == keyLoc);
     console.log(clip.name);
   }
   clip.action.play();
-  console.log(clip);
   //   pressed = true;
 }
 
 function keyUp(e) {
-  const key = e.key.toLowerCase();
+  const keycode = e.keyCode;
   const loc = e.location;
-  const keyLoc = `${key}${loc}`;
+  const keyLoc = `${keycode}${loc}`;
   pressed = false;
+
   let clip;
   if (loc == 0) {
-    clip = key_release.find(clipObj => clipObj.name == key);
+    clip = key_release.find(clipObj => clipObj.name == keycode);
   } else {
     clip = key_release.find(clipObj => clipObj.name == keyLoc);
   }
@@ -284,7 +276,6 @@ function animate() {
   let delta = clock.getDelta();
 
   // controls.update(delta);
-  if (mixer) mixer.update(delta);
   if (mixers)
     mixers.forEach(i => {
       i.update(delta);
@@ -292,83 +283,13 @@ function animate() {
   stats.update();
 
   renderer.render(scene, camera);
-  // render();
 }
-
-// let selectedObject = null;
 
 function onDocumentMouseMove(event) {
   event.preventDefault();
 
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-}
-
-function onMouseDown(e) {
-  e.preventDefault();
-  camera.updateMatrixWorld();
-  raycaster.setFromCamera(mouse, camera);
-
-  // let intersects = raycaster.intersectObjects(scene.children, true);
-  let intersects = raycaster.intersectObject(model, true);
-
-  if (intersects.length > 0) {
-    if (
-      INTERSECTED != intersects[0].object &&
-      intersects[0].object.name === 'sa_low' &&
-      pressed == false
-    ) {
-      pressed = true;
-      clipAction.play();
-    }
-  }
-}
-
-function onMouseUp(e) {
-  e.preventDefault();
-  if (pressed == true) {
-    pressed = false;
-    clipAction2.play();
-  }
-}
-
-function render() {
-  camera.updateMatrixWorld();
-  raycaster.setFromCamera(mouse, camera);
-
-  // let intersects = raycaster.intersectObjects(scene.children, true);
-  let intersects = raycaster.intersectObject(model, true);
-
-  if (intersects.length > 0) {
-    console.log(intersects[0]);
-    if (
-      INTERSECTED != intersects[0].object &&
-      intersects[0].object.name[0] == 'sa_low'
-    ) {
-      let button = intersects[0].object;
-      if (INTERSECTED) {
-        button.material.emissive.setHex(INTERSECTED.currentHex);
-        button.rotation.x -= 0.1;
-        clipAction.play();
-      }
-
-      INTERSECTED = intersects[0].object;
-      INTERSECTED.currentHex = button.material.emissive.getHex();
-      button.material.emissive.setHex(0xff0000);
-
-      button.rotation.x += 0.1;
-      clipAction2.play();
-    }
-  } else {
-    if (INTERSECTED) {
-      INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
-      INTERSECTED.rotation.x -= 0.1;
-      clipAction.play();
-    }
-
-    INTERSECTED = null;
-  }
-  renderer.render(scene, camera);
 }
 
 function getIntersects(x, y) {
