@@ -248,6 +248,7 @@ function onWindowResize() {
 }
 
 function keyDown(e) {
+  e.preventDefault();
   let clip = keys.find(clipObj => clipObj.name.includes(e.code));
   clip.actionPress.play();
 
@@ -258,6 +259,7 @@ function keyDown(e) {
 }
 
 function keyUp(e) {
+  e.preventDefault();
   let clip = keys.find(clipObj => clipObj.name.includes(e.code));
   clip.actionRelease.play();
   clip.pressed = false;
