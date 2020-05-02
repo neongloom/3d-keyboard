@@ -2,3 +2,11 @@
 *.un~
 *.swo
 *.swp
+
+/mat/white_norway_spruce_quarter_cut_Base_Color.jpg
+/mat/white_norway_spruce_quarter_cut_Normal.jpg
+/mat/white_norway_spruce_quarter_cut_Roughness.jpg
+
+/mat/black_ash_quarter_cut_Base_Color.jpg
+/mat/black_ash_quarter_cut_Normal.jpg
+/mat/black_ash_quarter_cut_Roughness.jpg

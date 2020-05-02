@@ -50,12 +50,12 @@ function init() {
   // scene.fog = new THREE.Fog(0xffffff, 15, 52);
   // scene.fog = new THREE.FogExp2(0xffffff, 0.03);
 
-  let light = new THREE.HemisphereLight(0xffffff, 0x101010, 1.0); // sky color, ground color, intensity
+  let light = new THREE.HemisphereLight(0xffffff, 0x101010, 0.5); // sky color, ground color, intensity
   light.position.set(0, 8, 0);
   scene.add(light);
 
   light = new THREE.DirectionalLight(0xbabfba);
-  light.intensity = 4;
+  light.intensity = 3;
   light.position.set(-3, 6, 2);
   light.target.position.set(0, 0, 0);
   light.castShadow = true;
@@ -74,27 +74,59 @@ function init() {
   light.shadow.camera.bottom = -0.2;
 
   scene.add(light);
+
+  light = new THREE.DirectionalLight(0xbabfba);
+  light.intensity = 1;
+  light.position.set(5, 6, -6);
+  light.target.position.set(0, 0, 0);
+  light.castShadow = true;
+
+  light.shadow.bias = -0.0001;
+  light.shadow.mapSize.width = 2048;
+  light.shadow.mapSize.height = 2048;
+  light.shadow.camera.near = 0.001;
+  light.shadow.camera.far = 10;
+  light.shadow.radius = 4;
+  light.decay = 2;
+
+  light.shadow.camera.left = -0.2;
+  light.shadow.camera.right = 0.2;
+  light.shadow.camera.top = 0.2;
+  light.shadow.camera.bottom = -0.2;
+
+  scene.add(light);
   // scene.add(light.target);
 
   let floorTex = [
-    new THREE.TextureLoader().load('mat/plastic_grain_Base_Color.jpg'),
-    new THREE.TextureLoader().load('mat/plastic_grain_Metallic.jpg'),
-    new THREE.TextureLoader().load('mat/plastic_grain_Normal.jpg'),
-    new THREE.TextureLoader().load('mat/plastic_grain_Roughness.jpg')
+    // new THREE.TextureLoader().load(
+    //   'mat/white_norway_spruce_quarter_cut_Base_Color.jpg'
+    // ),
+    // new THREE.TextureLoader().load(
+    //   'mat/white_norway_spruce_quarter_cut_Normal.jpg'
+    // ),
+    // new THREE.TextureLoader().load(
+    //   'mat/white_norway_spruce_quarter_cut_Roughness.jpg'
+    // ),
+
+    new THREE.TextureLoader().load('mat/black_koto_quarter_cut_Base_Color.jpg'),
+    new THREE.TextureLoader().load('mat/black_koto_quarter_cut_Normal.jpg'),
+    new THREE.TextureLoader().load('mat/black_koto_quarter_cut_Roughness.jpg'),
+
+    new THREE.TextureLoader().load('mat/black_ash_quarter_cut_Base_Color.jpg'),
+    new THREE.TextureLoader().load('mat/black_ash_quarter_cut_Normal.jpg'),
+    new THREE.TextureLoader().load('mat/black_ash_quarter_cut_Roughness.jpg')
   ];
 
   floorTex.forEach(i => {
     i.wrapS = THREE.RepeatWrapping;
     i.wrapT = THREE.RepeatWrapping;
-    i.repeat.set(4, 4);
+    i.repeat.set(10, 10);
   });
 
   let deskMat = new THREE.MeshStandardMaterial({
     map: floorTex[0],
-    metalnessMap: floorTex[1],
-    normalMap: floorTex[2],
-    roughnessMap: floorTex[3],
-    color: 0x404040
+    normalMap: floorTex[1],
+    roughnessMap: floorTex[2]
   });
 
   let plainMat = new THREE.MeshStandardMaterial({
@@ -102,7 +134,7 @@ function init() {
   });
 
   // ground
-  let ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(20, 20), plainMat);
+  let ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(5, 5), deskMat);
   ground.rotation.x = -Math.PI / 2;
   // ground.position.y -= 0.01;
   scene.add(ground);
@@ -181,7 +213,7 @@ function init() {
   renderer.gammaOutput = true;
 
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.2;
+  renderer.toneMappingExposure = 1.0;
 
   controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(0, 0, 0);
